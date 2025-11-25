@@ -1,0 +1,1 @@
+ We want visually beautiful, appealing, state of the art, something that is soothing calm, that will provide us a peaceful experience this is that we wanna build. 
