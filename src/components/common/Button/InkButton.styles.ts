@@ -1,25 +1,60 @@
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
-export const StyledInkButton = styled(motion.button) <{ $variant?: 'primary' | 'secondary' }>`
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-family: ${({ theme }) => theme.typography.fontFamily.body};
-  font-weight: ${({ theme }) => theme.typography.weights.medium};
-  font-size: ${({ theme }) => theme.typography.sizes.body};
-  transition: all ${({ theme }) => theme.transitions.fast};
+export const StyledButton = styled(motion.button)<{ $variant?: 'primary' | 'secondary' }>`
+  /* Typography */
+  font-family: ${({ theme }) => theme.typography.fontBody};
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+
+  /* Shape */
+  padding: 1rem 2rem;
+  border-radius: 50px; /* Pill shape */
+  border: none;
+  cursor: pointer;
   
-  background-color: ${({ theme, $variant }) =>
-        $variant === 'secondary' ? 'transparent' : theme.colors.ink};
-  
-  color: ${({ theme, $variant }) =>
-        $variant === 'secondary' ? theme.colors.ink : theme.colors.background};
-  
-  border: 1px solid ${({ theme, $variant }) =>
-        $variant === 'secondary' ? theme.colors.ink : 'transparent'};
+  /* Alignment */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  /* Color Logic: Primary */
+  ${({ theme, $variant }) => $variant !== 'secondary' && `
+    background-color: ${theme.colors.ink.primary};
+    color: ${theme.colors.surface};
+    border: 2px solid transparent;
+  `}
+
+  /* Color Logic: Secondary (Outline) */
+  ${({ theme, $variant }) => $variant === 'secondary' && `
+    background-color: transparent;
+    color: ${theme.colors.ink.primary};
+    border: 2px solid ${theme.colors.ink.tertiary};
+  `}
+
+  /* Animation */
+  transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.medium};
     transform: translateY(-1px);
+    
+    ${({ theme, $variant }) => $variant === 'secondary' ? `
+       border-color: ${theme.colors.ink.primary};
+       background-color: ${theme.colors.highlight};
+    ` : `
+       background-color: ${theme.colors.accent};
+       box-shadow: ${theme.visuals.shadow.hover};
+    `}
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;

@@ -1,27 +1,35 @@
 import React from 'react';
-import { StyledWeatherCard, WeatherIcon, WeatherLabel } from './WeatherCard.styles';
+import { StyledWeatherCard, IconWrapper, Title, Description } from './WeatherCard.styles';
 
 interface WeatherCardProps {
-    icon: React.ReactNode;
-    label: string;
-    selected?: boolean;
-    onClick?: () => void;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
 }
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({
-    icon,
-    label,
-    selected,
-    onClick
+  title,
+  description,
+  icon,
+  isActive,
+  onClick
 }) => {
-    return (
-        <StyledWeatherCard
-            $selected={selected}
-            onClick={onClick}
-            whileTap={{ scale: 0.95 }}
-        >
-            <WeatherIcon>{icon}</WeatherIcon>
-            <WeatherLabel>{label}</WeatherLabel>
-        </StyledWeatherCard>
-    );
+  return (
+    <StyledWeatherCard 
+      interactive 
+      $isActive={isActive} 
+      onClick={onClick}
+      // Framer Motion Prop for nice entrance
+      whileHover={{ y: -5 }} 
+      whileTap={{ scale: 0.98 }}
+    >
+      <IconWrapper $isActive={isActive}>
+        {icon}
+      </IconWrapper>
+      <Title>{title}</Title>
+      <Description dangerouslySetInnerHTML={{ __html: description }} />
+    </StyledWeatherCard>
+  );
 };

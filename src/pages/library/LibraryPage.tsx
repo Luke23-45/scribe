@@ -1,27 +1,17 @@
 import React from 'react';
-import styled from 'styled-components';
-import { CuratedShelf } from '../../features/library/CuratedShelf';
-import { DraftingTable } from '../../features/library/DraftingTable';
-
-const PageContainer = styled.div`
-  min-height: 100vh;
-  padding: 80px 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const PageHeader = styled.h1`
-  font-size: ${({ theme }) => theme.typography.sizes.h1};
-  margin-bottom: 48px;
-  color: ${({ theme }) => theme.colors.ink};
-`;
-
+import { PageShell } from '@/components/layout/PageShell';
+// import { BookshelfSection } from '@/features/library/BookshelfSection'; // <-- DELETE THIS OLD IMPORT
+// import { CatalogEngine } from '@/features/library/CatalogEngine';      // <-- USE THIS NEW ONE
+import { DraftingSection } from '@/features/library/DraftingSection';
+import { CatalogEngine } from '@/features/library/BookshelfSection';
 export const LibraryPage: React.FC = () => {
   return (
-    <PageContainer>
-      <PageHeader>Your Library</PageHeader>
-      <CuratedShelf />
-      <DraftingTable />
-    </PageContainer>
+    <PageShell>
+      {/* 1. The Premium Catalog Engine (Search + Filter + Grid) */}
+      <CatalogEngine />
+      
+      {/* 2. The Custom Input Area */}
+      <DraftingSection />
+    </PageShell>
   );
 };

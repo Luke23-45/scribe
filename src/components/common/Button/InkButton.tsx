@@ -1,24 +1,20 @@
 import React from 'react';
-import type { ComponentProps } from 'react';
-import { StyledInkButton } from './InkButton.styles';
+import { StyledButton } from './InkButton.styles';
+import {type HTMLMotionProps } from 'framer-motion';
 
-interface InkButtonProps extends Omit<ComponentProps<typeof StyledInkButton>, '$variant'> {
-    variant?: 'primary' | 'secondary';
-    children: React.ReactNode;
+interface InkButtonProps extends HTMLMotionProps<"button"> {
+  variant?: 'primary' | 'secondary';
+  children: React.ReactNode;
 }
 
-export const InkButton: React.FC<InkButtonProps> = ({
-    variant = 'primary',
-    children,
-    ...props
+export const InkButton: React.FC<InkButtonProps> = ({ 
+  variant = 'primary', 
+  children, 
+  ...props 
 }) => {
-    return (
-        <StyledInkButton
-            $variant={variant}
-            whileTap={{ scale: 0.98 }}
-            {...props}
-        >
-            {children}
-        </StyledInkButton>
-    );
+  return (
+    <StyledButton $variant={variant} {...props}>
+      {children}
+    </StyledButton>
+  );
 };

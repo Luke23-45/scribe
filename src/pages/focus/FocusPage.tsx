@@ -1,44 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
-import { CockpitHeader } from '../../features/focus/CockpitHeader';
-import { WritingSurface } from '../../features/focus/WritingSurface';
+import React, { useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { useSessionState } from '../../core/store/useSessionState'; // Adjust path based on your store location
 
-const PageContainer = styled.div`
-  min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.background};
-  position: relative;
-`;
+// Components
+import { PageShell } from '../../components/layout/PageShell';
+
+// Features
+import { CockpitSection } from '../../features/focus/CockpitSection';
+import { EditorSection } from '../../features/focus/EditorSection';
 
 export const FocusPage: React.FC = () => {
-    const [isActive, setIsActive] = useState(false);
-    const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const navigate = useNavigate();
+  const activeTextSource = useSessionState((s) => s.activeTextSource);
 
-    const handleActivity = useCallback(() => {
-        setIsActive(false);
-        if (timer) clearTimeout(timer);
+  // Guard: Redirect if no text selected
+  useEffect(() => {
+    if (!activeTextSource) {
+      navigate({ to: '/library' });
+    }
+  }, [activeTextSource, navigate]);
 
-        const newTimer = setTimeout(() => {
-            setIsActive(true);
-        }, 3000);
+  if (!activeTextSource) return null;
 
-        setTimer(newTimer);
-    }, [timer]);
+  return (
+    <PageShell>
+      {/* 1. Auto-hiding Header */}
+      <CockpitSection title={activeTextSource.title} />
 
-    useEffect(() => {
-        window.addEventListener('mousemove', handleActivity);
-        window.addEventListener('keydown', handleActivity);
-
-        return () => {
-            window.removeEventListener('mousemove', handleActivity);
-            window.removeEventListener('keydown', handleActivity);
-            if (timer) clearTimeout(timer);
-        };
-    }, [handleActivity, timer]);
-
-    return (
-        <PageContainer>
-            <CockpitHeader isActive={isActive} />
-            <WritingSurface onActivity={handleActivity} />
-        </PageContainer>
-    );
+      {/* 2. The Main Event */}
+      <EditorSection sourceText={activeTextSource.fullText} />
+      
+      {/* 3. Subtle Footer hint */}
+      <div style={{ 
+        position: 'fixed', bottom: '2rem', right: '2rem', 
+        opacity: 0.2, fontSize: '0.8rem' 
+      }}>
+        Press [TAB] to Skip Word
+      </div>
+    </PageShell>
+  );
 };

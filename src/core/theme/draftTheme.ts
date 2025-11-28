@@ -1,48 +1,45 @@
-export const draftTheme = {
+import {type Theme } from './theme.types';
+
+export const draftTheme: Theme = {
+  mode: 'draft',
+
   colors: {
-    background: '#FAF9F6', // Warm Rice Paper
-    ink: '#2C2C2C', // Charcoal Ink
-    text: {
-      primary: '#2C2C2C',
-      secondary: '#5A5A5A',
-      muted: '#8C8C8C',
+    background: '#FAF9F6',  // Warm "Rice Paper"
+    surface: '#FFFFFF',     // Pure White Paper
+    
+    ink: {
+      primary: '#2C2C2C',    // Soft Charcoal
+      secondary: '#6E6B65',  // Warm Gray
+      tertiary: '#E5E0D8',   // Light Stone
     },
-    surface: {
-      paper: '#FFFFFF',
-      shadow: 'rgba(44, 44, 44, 0.08)',
-    },
-    accent: {
-      primary: '#2C2C2C', // Using Ink as primary accent for now
-      subtle: '#E0E0E0',
-    }
+
+    accent: '#8DA399',      // Eucalyptus Sage
+    highlight: '#F0EFE9',    // Very subtle beige hover
+    panic: '#D4A373',        // Muted Gold
+    success: '#8DA399',      
   },
+
   typography: {
-    fontFamily: {
-      heading: '"Fraunces", serif',
-      body: '"Inter", sans-serif',
-    },
-    weights: {
-      regular: 400,
-      medium: 500,
-      bold: 700,
-    },
-    sizes: {
-      h1: '3rem',
-      h2: '2.25rem',
-      h3: '1.5rem',
+    fontDisplay: '"Fraunces", "Georgia", serif', 
+    fontBody: '"Inter", system-ui, -apple-system, sans-serif',
+    
+    fontSize: {
+      hero: '3.5rem',
+      heading: '2rem',
+      subheading: '1.25rem',
       body: '1rem',
       small: '0.875rem',
-    }
+    },
   },
-  shadows: {
-    soft: '0px 4px 20px rgba(44, 44, 44, 0.05)',
-    medium: '0px 8px 30px rgba(44, 44, 44, 0.08)',
-    deep: '0px 12px 40px rgba(44, 44, 44, 0.12)',
-  },
-  transitions: {
-    default: '0.6s ease-out',
-    fast: '0.3s ease-out',
-  }
-};
 
-export type ThemeType = typeof draftTheme;
+  visuals: {
+    shadow: {
+      // Shadows are brown-tinted (#3C3C32), not black, for warmth
+      resting: '0px 2px 4px rgba(60, 60, 50, 0.04)',
+      hover: '0px 8px 24px rgba(60, 60, 50, 0.08)',
+      floating: '0px 20px 40px rgba(60, 60, 50, 0.12)',
+    },
+    radius: '12px',          
+    transition: '0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', 
+  },
+};
