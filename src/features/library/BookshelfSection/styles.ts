@@ -49,11 +49,29 @@ export const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem;
+  padding: 4rem 2rem;
   text-align: center;
-  
-  opacity: 0.5;
+  min-height: 300px;
+`;
+
+export const EmptyIcon = styled.div`
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+`;
+
+export const EmptyTitle = styled.h3`
+  font-family: ${({ theme }) => theme.typography.fontDisplay};
+  font-size: 1.25rem;
+  color: ${({ theme }) => theme.colors.ink.primary};
+  margin: 0 0 0.5rem 0;
+`;
+
+export const EmptySubtitle = styled.p`
+  font-family: ${({ theme }) => theme.typography.fontBody};
+  font-size: 0.95rem;
   color: ${({ theme }) => theme.colors.ink.secondary};
-  
-  font-style: italic;
+  max-width: 400px;
+  line-height: 1.5;
+  margin: 0;
 `;

@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 // --- LAYOUT CONSTANTS ---
 // Reduced height ensures context words feel "close" to the active chunk
-export const ROW_HEIGHT = 90; 
-export const REEL_VIEWPORT_HEIGHT = 500; 
+export const ROW_HEIGHT = 90;
+export const REEL_VIEWPORT_HEIGHT = 500;
 
 export const StageContainer = styled.div`
   position: relative;
@@ -50,6 +50,8 @@ export const Row = styled.div<{ $isActive: boolean }>`
     opacity: 1;
     transform: scale(1);
     z-index: 10; /* Float above neighbors */
+    /* Subtle glow for active row */
+    filter: drop-shadow(0 0 20px rgba(141, 163, 153, 0.15));
   ` : css`
     /* Inactive rows fade back heavily so focus remains center */
     opacity: 0.3; 
@@ -62,10 +64,15 @@ export const Word = styled.span<{ $status: string }>`
   font-family: ${({ theme }) => theme.typography.fontDisplay};
   white-space: nowrap;
   
-  /* TYPOGRAPHY SCALING */
+  /* DYNAMIC TYPOGRAPHY SCALING */
   /* Active Chunk is Hero Size, Context is Subtitle Size */
-  font-size: ${({ $status }) => $status === 'ACTIVE' ? '2.5rem' : '1.75rem'};
-  transition: font-size 0.4s ease, color 0.4s ease, opacity 0.4s ease;
+  /* Uses CSS custom property from parent for user-controlled scaling */
+  font-size: ${({ $status }) =>
+    $status === 'ACTIVE'
+      ? 'calc(2.5rem * var(--font-scale, 1))'
+      : 'calc(1.75rem * var(--font-scale, 1))'};
+  line-height: var(--line-spacing, 1.8);
+  transition: font-size 0.4s ease, color 0.4s ease, opacity 0.4s ease, transform 0.3s ease;
 
   ${({ theme, $status }) => $status === 'ACTIVE' && css`
     color: ${theme.colors.ink.primary};
@@ -85,29 +92,47 @@ export const Word = styled.span<{ $status: string }>`
 
 export const BlindCurtain = styled(motion.div)`
   position: absolute;
-  /* Ensure it covers the words completely with a little margin */
-  top: 5px; 
-  bottom: 5px; 
-  left: -2rem; 
-  right: -2rem;
+  /* Ensure it covers the words completely with breathing room */
+  top: 4px; 
+  bottom: 4px; 
+  left: -2.5rem; 
+  right: -2.5rem;
   
-  /* THE PAPER CARD VISUAL */
-  background-color: ${({ theme }) => theme.colors.surface}; 
+  /* THE PAPER CARD VISUAL - Premium calm surface */
+  background: linear-gradient(
+    180deg,
+    ${({ theme }) => theme.colors.surface} 0%,
+    ${({ theme }) => theme.colors.surface}F8 100%
+  );
   
-  /* "Float" Effect */
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
-  border-radius: 12px;
+  /* Premium floating effect with subtle accent glow */
+  box-shadow: 
+    0 8px 32px -8px rgba(0, 0, 0, 0.08),
+    0 4px 16px -4px rgba(0, 0, 0, 0.04),
+    0 0 0 1px ${({ theme }) => theme.colors.ink.tertiary}08,
+    inset 0 1px 0 ${({ theme }) => theme.colors.surface};
+  
+  border-radius: 16px;
   z-index: 20;
+  
+  /* Subtle interior highlight for premium feel */
+  border: 1px solid ${({ theme }) => theme.colors.ink.tertiary}12;
   
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 2rem;
+  padding: 0 2.5rem;
+  
+  /* GPU acceleration for smooth animations */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 `;
 
 export const CipherTextWrapper = styled.div`
   font-family: ${({ theme }) => theme.typography.fontDisplay};
-  font-size: 2.5rem; /* Match Active Word Size */
+  /* Dynamic font size from CSS custom property */
+  font-size: calc(2.5rem * var(--font-scale, 1));
+  line-height: var(--line-spacing, 1.8);
   font-weight: 600;
   
   display: flex;

@@ -109,3 +109,55 @@ export const MetadataInput = styled.input`
   }
 `;
 
+export const SelectWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  
+  label {
+    font-family: ${({ theme }) => theme.typography.fontBody};
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.ink.tertiary};
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+`;
+
+export const PhaseSelect = styled.select`
+  padding: 0.75rem 1rem;
+  border: 1px solid ${({ theme }) => theme.colors.ink.tertiary}40;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.colors.background};
+  font-family: ${({ theme }) => theme.typography.fontBody};
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.ink.primary};
+  cursor: pointer;
+  transition: border-color 0.2s;
+  
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.accent};
+  }
+`;
+
+export const SuccessMessage = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  
+  background: #E8F5E9;
+  border: 1px solid #81C784;
+  border-radius: 12px;
+  
+  font-family: ${({ theme }) => theme.typography.fontBody};
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2E7D32;
+  
+  svg {
+    stroke: #43A047;
+  }
+`;

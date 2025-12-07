@@ -13,7 +13,7 @@ export interface Token {
 }
 
 export const useTranscriptionEngine = (
-  fullText: string, 
+  fullText: string,
   chunkSize: number = 3
 ) => {
   // Use our procedural sound engine
@@ -21,11 +21,11 @@ export const useTranscriptionEngine = (
 
   // --- 1. STATE MACHINE ---
   // Absolute character index in the full string
-  const [cursorIndex, setCursorIndex] = useState(0); 
-  
+  const [cursorIndex, setCursorIndex] = useState(0);
+
   // Word index indicating where the current "View Window" starts
   const [chunkStartIndex, setChunkStartIndex] = useState(0);
-  
+
   // Interaction Phase: Reading (Blocked Input) vs Writing (Hidden Text)
   const [phase, setPhase] = useState<SessionPhase>('READING');
 
@@ -33,7 +33,7 @@ export const useTranscriptionEngine = (
   // We memorize the split so we don't recalculate on every keystroke
   const words = useMemo(() => {
     // Sanitize input slightly to ensure spacing matches our logic logic
-    const sanitized = fullText.replace(/\s+/g, ' ').trim(); 
+    const sanitized = fullText.replace(/\s+/g, ' ').trim();
     return sanitized.split(' ');
   }, [fullText]);
 
@@ -44,7 +44,7 @@ export const useTranscriptionEngine = (
       const wLength = words[i].length;
       // (+1 for space, except last word)
       const span = wLength + (i < words.length - 1 ? 1 : 0);
-      
+
       // Is cursor inside this word's span?
       if (cursorIndex < charCount + span) {
         return i;
@@ -62,27 +62,37 @@ export const useTranscriptionEngine = (
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     // B. PHASE: READING (Memorization)
-    // In this phase, we BLOCK typing. The user must explicitly choose to "Begin".
+    // Auto-transition when user types the first correct character
+    // This creates a seamless, natural feeling - just start typing!
     if (phase === 'READING') {
-      if (key === 'Enter' || key === ' ') {
+      // Get the expected first character
+      const expectedChar = fullText[cursorIndex];
+
+      // If the typed key matches the expected character, auto-transition to WRITING
+      if (key === expectedChar) {
         e.preventDefault();
         setPhase('WRITING');
         playWhoosh(); // Audio cue: Entering Deep Work
+
+        // Also process the keystroke (advance cursor) since it's correct
+        setCursorIndex(prev => prev + 1);
+        playClick(); // Tactile feedback for the keystroke
       }
-      return; // Ignore other keys
+      // Ignore all other keys during reading phase
+      return;
     }
 
     // C. PHASE: WRITING (Blind Recall)
-    if (key === 'ArrowUp' || key === 'Tab') {
+    // Tab provides ergonomic "peek" functionality to return to reading
+    if (key === 'Tab') {
       e.preventDefault();
-      setPhase('READING'); 
-      // Optional: Play a sound like sliding a paper back?
+      setPhase('READING');
       return;
     }
-    
+
     // --- 1. BACKSPACE LOGIC (New) ---
     if (key === 'Backspace') {
-      e.preventDefault(); 
+      e.preventDefault();
 
       // Boundary Calculation:
       // We calculate the absolute character index where the current chunk STARTED.
@@ -111,37 +121,40 @@ export const useTranscriptionEngine = (
       playClick(); // Tactile feedback
 
       // -- LOOKAHEAD: Did we finish the Chunk? --
-      
-      // Logic: Calculate where the 'Next Cursor' lands in terms of words
-      let tempCharCount = 0;
-      let nextWordPtr = 0;
-      
-      for (let i = 0; i < words.length; i++) {
-        const span = words[i].length + (i < words.length - 1 ? 1 : 0);
-        
-        // If next cursor is within this word boundary
-        if (nextCursor < tempCharCount + span) {
-          nextWordPtr = i;
-          break;
+
+      // Calculate the character position where the last word of the chunk ENDS
+      // (not including the trailing space)
+      const currentChunkEndIndex = chunkStartIndex + chunkSize;
+
+      // Calculate the exact character position of the end of the last word in the chunk
+      let lastWordEndChar = 0;
+      for (let i = 0; i < Math.min(currentChunkEndIndex, words.length); i++) {
+        lastWordEndChar += words[i].length;
+        if (i < currentChunkEndIndex - 1 && i < words.length - 1) {
+          lastWordEndChar += 1; // Add space between words, but not after the last word of chunk
         }
-        
-        tempCharCount += span;
-        nextWordPtr = i + 1; // It has crossed into the next word
       }
 
-      // Check if that new pointer exceeds our visible window
-      const currentChunkEndIndex = chunkStartIndex + chunkSize;
-      
-      if (nextWordPtr >= currentChunkEndIndex) {
-        // **CHUNK COMPLETE**
-        // 1. Advance the view (Scrolls the Teleprompter)
-        setChunkStartIndex(currentChunkEndIndex);
-        
-        // 2. Open the shutter (Switch back to reading mode for next set)
-        setPhase('READING');
-        
-        // 3. Audio Reward (Release tension)
-        playWhoosh();
+      // Check if we just completed the last character of the chunk
+      // (cursor is now at or past the end of the last word)
+      if (nextCursor >= lastWordEndChar) {
+        // **CHUNK COMPLETE** - seamless transition with visual feedback delay!
+
+        // Small delay so user sees the last character before transition
+        setTimeout(() => {
+          // Skip the trailing space (if any) so next chunk starts clean
+          const nextChunkStartChar = lastWordEndChar + (currentChunkEndIndex < words.length ? 1 : 0);
+          setCursorIndex(nextChunkStartChar);
+
+          // Advance the view (Scrolls the Teleprompter)
+          setChunkStartIndex(currentChunkEndIndex);
+
+          // Switch back to reading mode for next set
+          setPhase('READING');
+
+          // Audio Reward (Release tension)
+          playWhoosh();
+        }, 180); // 180ms - enough to see the last character, short enough to feel responsive
       }
 
     } else {
@@ -160,14 +173,14 @@ export const useTranscriptionEngine = (
     return words.map((w, i) => {
       const start = charCounter;
       const end = start + w.length;
-      
+
       // Move counter forward
       const span = w.length + (i < words.length - 1 ? 1 : 0);
       charCounter += span;
 
       // Determine Status based on Window position
       let status: Token['status'] = 'PENDING';
-      
+
       if (i < chunkStartIndex) {
         status = 'DONE';
       } else if (i >= chunkStartIndex && i < chunkStartIndex + chunkSize) {

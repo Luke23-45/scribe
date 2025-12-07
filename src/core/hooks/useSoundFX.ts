@@ -1,7 +1,9 @@
 import { useCallback, useRef, useEffect } from 'react';
+import { useSettingsStore } from '@/core/store/useSettingsStore';
 
 export const useSoundFX = () => {
   const audioContext = useRef<AudioContext | null>(null);
+  const audioEnabled = useSettingsStore((state) => state.audioEnabled);
 
   // Initialize Audio Context (User interaction required to unlock audio on some browsers)
   useEffect(() => {
@@ -11,7 +13,7 @@ export const useSoundFX = () => {
         if (Ctx) audioContext.current = new Ctx();
       }
     };
-    
+
     // Lazy init on first click/key to bypass autoplay policies
     window.addEventListener('click', initAudio, { once: true });
     window.addEventListener('keydown', initAudio, { once: true });
@@ -19,14 +21,14 @@ export const useSoundFX = () => {
     return () => {
       // Cleanup is usually not strictly necessary for global context, but good practice
       if (audioContext.current && audioContext.current.state !== 'closed') {
-         // keeping it alive for app session is usually better performance
+        // keeping it alive for app session is usually better performance
       }
     };
   }, []);
 
   // 1. The Mechanical Click (Satisfying High-Pitch 'Thwack')
   const playClick = useCallback(() => {
-    if (!audioContext.current) return;
+    if (!audioEnabled || !audioContext.current) return;
     const ctx = audioContext.current;
 
     // Create Oscillator for the "Switch" sound
@@ -48,11 +50,11 @@ export const useSoundFX = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.05);
-  }, []);
+  }, [audioEnabled]);
 
   // 2. The Error Thud (Soft, low frequency 'No')
   const playError = useCallback(() => {
-    if (!audioContext.current) return;
+    if (!audioEnabled || !audioContext.current) return;
     const ctx = audioContext.current;
 
     const osc = ctx.createOscillator();
@@ -73,13 +75,13 @@ export const useSoundFX = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.15);
-  }, []);
+  }, [audioEnabled]);
 
   // 3. The Release (White Noise 'Whoosh' for TK Button)
   const playWhoosh = useCallback(() => {
-    if (!audioContext.current) return;
+    if (!audioEnabled || !audioContext.current) return;
     const ctx = audioContext.current;
-    
+
     // Create Noise Buffer
     const bufferSize = ctx.sampleRate * 0.2; // 0.2 seconds
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -90,23 +92,49 @@ export const useSoundFX = () => {
 
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
-    
+
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(400, ctx.currentTime);
-    
+
     const gain = ctx.createGain();
-    
+
     noise.connect(filter);
     filter.connect(gain);
     gain.connect(ctx.destination);
-    
+
     // Soft Fade
     gain.gain.setValueAtTime(0.1, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-    
-    noise.start(ctx.currentTime);
-  }, []);
 
-  return { playClick, playError, playWhoosh };
+    noise.start(ctx.currentTime);
+  }, [audioEnabled]);
+
+  // 4. The Transition Swoosh (Calm Mode Switch)
+  // A gentle ascending tone that feels like opening a door to focus
+  const playTransition = useCallback(() => {
+    if (!audioEnabled || !audioContext.current) return;
+    const ctx = audioContext.current;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    // Gentle ascending tone (feels like "opening" or "calming")
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(180, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.18);
+
+    // Very soft envelope - calming, not jarring
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.22);
+  }, [audioEnabled]);
+
+  return { playClick, playError, playWhoosh, playTransition };
 };

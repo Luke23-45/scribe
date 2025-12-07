@@ -5,19 +5,21 @@ import styled from 'styled-components';
 
 const Char = styled.span<{ $visible: boolean; $isSpace?: boolean }>`
   display: inline-block;
-  min-width: ${({ $isSpace }) => ($isSpace ? '0.3em' : 'auto')};
+  min-width: ${({ $isSpace }) => ($isSpace ? '0.4em' : 'auto')};
   
-  /* 1. STABLE COLOR TRANSITION */
-  /* If visible -> Ink Color. If hidden -> Transparent */
+  /* 1. INK REVEAL TRANSITION */
+  /* Visible = Full ink color, Hidden = Transparent with visible placeholder */
   color: ${({ theme, $visible }) => $visible ? theme.colors.ink.primary : 'transparent'};
   
-  /* 2. THE EMPTY LINE */
-  border-bottom: ${({ theme, $visible }) => $visible ? 'none' : `2px solid ${theme.colors.ink.tertiary}40`};
+  /* 2. VISIBLE PLACEHOLDER LINE */
+  /* Thicker, more visible underline for untyped characters */
+  border-bottom: ${({ theme, $visible }) =>
+    $visible ? 'none' : `3px solid ${theme.colors.ink.tertiary}60`};
+  border-radius: 1px;
   
-  /* 3. SPEED */
-  /* 0s = Instant appearance (Typewriter feel). 
-     0.1s = Very subtle fade (Ink feel). */
-  transition: color 0s linear, border-bottom 0s linear; 
+  /* 3. GENTLE INK FEEL ANIMATION */
+  /* 0.08s gives a subtle "ink appearing" feel */
+  transition: color 0.08s ease-out, border-bottom 0.1s ease-out;
 `;
 
 interface CipherWordProps {
@@ -36,8 +38,8 @@ export const CipherWord: React.FC<CipherWordProps> = ({ text, charIndexStart, cu
         const isVisible = globalCharAddr < cursorIndex;
 
         return (
-          <Char 
-            key={localIdx} 
+          <Char
+            key={localIdx}
             $visible={isVisible}
             $isSpace={char === ' '}
           >
